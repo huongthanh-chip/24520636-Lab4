@@ -44,8 +44,15 @@ def main():
     X_train, X_test = X[:n_train], X[n_train:]
     y_train, y_test = y[:n_train], y[n_train:]
 
-    rf = RandomForest(n_estimators=100, max_depth=12, min_samples_split=5, max_features='sqrt', random_state=42)
-    rf.fit(X_train, y_train)
+    # --- BƯỚC QUAN TRỌNG: OVERSAMPLING ---
+    X_train_good = X_train[y_train == 1]
+    y_train_good = y_train[y_train == 1]
+
+    X_balanced = np.vstack([X_train, X_train_good, X_train_good, X_train_good])
+    y_balanced = np.concatenate([y_train, y_train_good, y_train_good, y_train_good])
+
+    rf = RandomForest(n_estimators=200, max_depth=12, min_samples_split=2, max_features=0.6, random_state=42)
+    rf.fit(X_balanced, y_balanced, verbose=True)
     y_pred = rf.predict(X_test)
 
     precision, recall, f1 = f1_score(y_test, y_pred)

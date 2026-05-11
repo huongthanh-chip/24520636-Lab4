@@ -1,5 +1,7 @@
 import numpy as np
+import sys
 from DecisionTreeNumPy import DecisionTree
+from tqdm import tqdm
 
 
 class RandomForest:
@@ -27,15 +29,17 @@ class RandomForest:
                 return max(1, int(np.log2(n_features)))
         return n_features
 
-    def fit(self, X, y):
+    def fit(self, X, y, verbose=False):
         X = np.asarray(X)
         y = np.asarray(y)
         n_samples, n_features = X.shape
         m = self._max_features_count(n_features)
         self.trees = []
         self.features_ = []
-
-        for i in range(self.n_estimators):
+        iterable = range(self.n_estimators)
+        if verbose:
+            iterable = tqdm(iterable, desc="Training Forest", unit="tree")
+        for i in iterable:
             if self.bootstrap:
                 idxs = self.rng.randint(0, n_samples, n_samples)
             else:
@@ -47,7 +51,6 @@ class RandomForest:
 
             tree = DecisionTree(max_depth=self.max_depth, min_samples_split=self.min_samples_split)
             tree.fit(X_boot, y_boot)
-
             self.trees.append(tree)
             self.features_.append(feat_idxs)
 

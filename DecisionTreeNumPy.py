@@ -1,5 +1,5 @@
 import numpy as np
-
+import sys
 
 class DecisionTree:
     def __init__(self, max_depth=None, min_samples_split=2):
@@ -7,12 +7,18 @@ class DecisionTree:
         self.min_samples_split = max(2, min_samples_split)
         self.root = None
 
-    def fit(self, X, y):
+    def fit(self, X, y, verbose=False):
         X = np.asarray(X)
         y = np.asarray(y)
+        self.verbose = verbose
+        self.node_count = 0
+        if self.verbose:
+            print("Training Decision Tree...")
         self.n_classes_ = len(np.unique(y))
         self.n_features_ = X.shape[1]
         self.root = self._grow_tree(X, y)
+        if self.verbose:
+            sys.stdout.write(f"\rDone! Total nodes created: {self.node_count}\n")
 
     def predict(self, X):
         X = np.asarray(X)
@@ -62,6 +68,12 @@ class DecisionTree:
         return best_idx, best_thr
 
     def _grow_tree(self, X, y, depth=0):
+        if self.verbose:
+            self.node_count += 1
+            spinner = ['|', '/', '-', '\\']
+            sys.stdout.write(f"\r{spinner[self.node_count % 4]} Nodes grown: {self.node_count}")
+            sys.stdout.flush()
+
         num_samples, num_features = X.shape
         num_labels = len(np.unique(y))
 
